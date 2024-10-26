@@ -8,7 +8,7 @@ import com.example.domain.repository.ProductRepository
 class ProductRepositoryImpl(
     private val networkService: NetworkService,
 ) : ProductRepository {
-    override suspend fun getProducts(): ResultWrapper<List<Product>> {
-        return networkService.getProducts()
+    override suspend fun getProducts(category: String?): ResultWrapper<List<Product>> {
+        return networkService.getProducts(category)
     }
 }

@@ -5,6 +5,6 @@ import com.example.domain.repository.ProductRepository
 class GetProductUseCase(
     private val productRepository: ProductRepository,
 ) {
-    suspend fun execute() = productRepository.getProducts()
+    suspend fun execute(category: String?) = productRepository.getProducts(category)
 
 }
