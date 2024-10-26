@@ -2,6 +2,7 @@ package com.example.shopify.ui.feature.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +53,12 @@ fun HomeScreen(
 ) {
 
     val uiState = viewModel.uiState.collectAsState()
+    val loading = remember { mutableStateOf(false) }
+    val error = remember { mutableStateOf<String?>(null) }
+
+    val featured = remember { mutableStateOf<List<Product>>(emptyList()) }
+    val popularProducts = remember { mutableStateOf<List<Product>>(emptyList()) }
+    val categories = remember { mutableStateOf<List<String>>(emptyList()) }
 
     Scaffold {
         Surface(
@@ -59,18 +68,32 @@ fun HomeScreen(
         ) {
             when (uiState.value) {
                 is HomeScreenUIEvents.Loading -> {
-                    CircularProgressIndicator()
+                    loading.value = true
+                    error.value = null
                 }
 
                 is HomeScreenUIEvents.Success -> {
                     val data = (uiState.value as HomeScreenUIEvents.Success)
-                    HomeContent(data.featured, data.popularProducts)
+                    featured.value = data.featured
+                    popularProducts.value = data.popularProducts
+                    categories.value = data.categories
+                    loading.value = false
+                    error.value = null
                 }
 
                 is HomeScreenUIEvents.Error -> {
-                    Text(text = (uiState.value as HomeScreenUIEvents.Error).message)
+                    val errorMsg = (uiState.value as HomeScreenUIEvents.Error).message
+                    loading.value = false
+                    error.value = errorMsg
                 }
             }
+            HomeContent(
+                featured = featured.value,
+                popularProducts = popularProducts.value,
+                categories = categories.value,
+                loading.value,
+                error.value
+            )
         }
     }
 
@@ -78,15 +101,20 @@ fun HomeScreen(
 
 @Composable
 fun ProfileHeader() {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 8.dp, vertical = 16.dp)
-    ){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 16.dp)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
-            Image(painter = painterResource(id = R.drawable.ic_profile), contentDescription = null, modifier = Modifier.size(48.dp))
+            Image(
+                painter = painterResource(id = R.drawable.ic_profile),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
@@ -149,13 +177,54 @@ fun SearchBar(value: String, onTextChanged: (String) -> Unit) {
 }
 
 @Composable
-fun HomeContent(featured: List<Product>, popularProducts: List<Product>) {
+fun HomeContent(
+    featured: List<Product>,
+    popularProducts: List<Product>,
+    categories: List<String>,
+    isLoading: Boolean = false,
+    errorMsg: String? = null,
+) {
     LazyColumn {
         item {
             ProfileHeader()
             Spacer(modifier = Modifier.size(16.dp))
             SearchBar(value = "", onTextChanged = {})
             Spacer(modifier = Modifier.size(16.dp))
+        }
+        item {
+            if (isLoading){
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(50.dp))
+                    Text(text = "Loading...", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            errorMsg?.let {
+                Text(text = it, style = MaterialTheme.typography.bodyMedium)
+            }
+            if (categories.isNotEmpty()) {
+
+                LazyRow {
+                    items(categories) { category ->
+                        Text(
+                            text = category.replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .padding(8.dp)
+
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.size(16.dp))
+            }
         }
         item {
 
