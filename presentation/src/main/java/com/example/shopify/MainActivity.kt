@@ -1,9 +1,13 @@
 package com.example.shopify
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -24,20 +30,35 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.shopify.model.UiProductModel
+import com.example.shopify.navigation.CartScreen
+import com.example.shopify.navigation.HomeScreen
+import com.example.shopify.navigation.ProductDetailsScreen
+import com.example.shopify.navigation.ProfileScreen
+import com.example.shopify.navigation.productNavType
 import com.example.shopify.ui.feature.home.HomeScreen
+import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.theme.ShopifyTheme
+import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ShopifyTheme {
+                val shouldShowBottomNav = remember {
+                    mutableStateOf(true)
+                }
                 val navController = rememberNavController()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        BottomNavigationBar(navController = navController)
+                        AnimatedVisibility(visible = shouldShowBottomNav.value, enter = fadeIn()) {
+                            BottomNavigationBar(navController = navController)
+                        }
                     }
                 ) {
                     Surface(
@@ -46,20 +67,33 @@ class MainActivity : ComponentActivity() {
                             .padding(it)
                     ) {
 
-                        NavHost(navController = navController, startDestination = "home") {
+                        NavHost(navController = navController, startDestination = HomeScreen) {
 
-                            composable("home") {
+                            composable<HomeScreen> {
+                                shouldShowBottomNav.value = true
                                 HomeScreen(navController)
                             }
-                            composable("cart") {
+                            composable<CartScreen> {
+                                shouldShowBottomNav.value = true
                                 Text(text = "Cart")
                             }
-                            composable("profile") {
+                            composable<ProfileScreen> {
+                                shouldShowBottomNav.value = true
                                 Text(text = "Profile")
                             }
+                            composable<ProductDetailsScreen>(
+                                typeMap = mapOf(typeOf<UiProductModel>() to productNavType)
+                            ) {
+                                shouldShowBottomNav.value = false
+                                val product = it.toRoute<ProductDetailsScreen>()
+                                ProductDetailsScreen(
+                                    navController = navController,
+                                    product = product.product
+                                )
+                            }
+
                         }
                     }
-
                 }
             }
         }
@@ -78,8 +112,10 @@ class MainActivity : ComponentActivity() {
             )
 
             items.forEach { item ->
+                val isSelected =
+                    currentRoute?.substringBefore("?") == item.route::class.qualifiedName
                 NavigationBarItem(
-                    selected = currentRoute == item.route,
+                    selected = isSelected,
                     onClick = {
                         navController.navigate(item.route) {
                             navController.graph.startDestinationRoute?.let { startRoute ->
@@ -96,7 +132,7 @@ class MainActivity : ComponentActivity() {
                         Image(
                             painter = painterResource(id = item.icon),
                             contentDescription = null,
-                            colorFilter = ColorFilter.tint(if (currentRoute == item.route) MaterialTheme.colorScheme.primary else Color.Gray)
+                            colorFilter = ColorFilter.tint(if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray)
                         )
                     }, colors = NavigationBarItemDefaults.colors().copy(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -110,10 +146,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class BottomNavItems(val route: String, val title: String, val icon: Int) {
-    data object Home : BottomNavItems("home", "Home", icon = R.drawable.ic_home)
-    data object Cart : BottomNavItems("cart", "Cart", icon = R.drawable.ic_cart)
-    data object Profile : BottomNavItems("profile", "Profile", icon = R.drawable.ic_profile_bn)
+sealed class BottomNavItems(val route: Any, val title: String, val icon: Int) {
+    data object Home : BottomNavItems(HomeScreen, "Home", icon = R.drawable.ic_home)
+    data object Cart : BottomNavItems(CartScreen, "Cart", icon = R.drawable.ic_cart)
+    data object Profile : BottomNavItems(ProfileScreen, "Profile", icon = R.drawable.ic_profile_bn)
 }
 
 

@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.domain.model.Product
 import com.example.shopify.R
+import com.example.shopify.model.UiProductModel
+import com.example.shopify.navigation.ProductDetailsScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -96,7 +99,10 @@ fun HomeScreen(
                 popularProducts = popularProducts.value,
                 categories = categories.value,
                 loading.value,
-                error.value
+                error.value,
+                onClick = {
+                    navController.navigate(ProductDetailsScreen(UiProductModel.fromProduct(it)))
+                }
             )
         }
     }
@@ -187,6 +193,7 @@ fun HomeContent(
     categories: List<String>,
     isLoading: Boolean = false,
     errorMsg: String? = null,
+    onClick: (Product) -> Unit
 ) {
     LazyColumn {
         item {
@@ -244,11 +251,11 @@ fun HomeContent(
         item {
 
             if (featured.isNotEmpty()) {
-                HomeProductRow(featured, "Featured")
+                HomeProductRow(featured, "Featured", onClick = onClick)
                 Spacer(modifier = Modifier.size(16.dp))
             }
             if (popularProducts.isNotEmpty()) {
-                HomeProductRow(popularProducts, "Popular Products")
+                HomeProductRow(popularProducts, "Popular Products", onClick = onClick)
             }
 
         }
@@ -259,7 +266,7 @@ fun HomeContent(
 
 
 @Composable
-fun HomeProductRow(products: List<Product>, title: String) {
+fun HomeProductRow(products: List<Product>, title: String, onClick: (Product) -> Unit) {
     Column {
         Box(
             modifier = Modifier
@@ -290,7 +297,7 @@ fun HomeProductRow(products: List<Product>, title: String) {
                     visible = isVisible.value,
                     enter = fadeIn() + expandVertically()
                 ) {
-                    ProductItem(product = product)
+                    ProductItem(product = product, onClick = {onClick(product)})
                 }
             }
         }
@@ -299,11 +306,12 @@ fun HomeProductRow(products: List<Product>, title: String) {
 }
 
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, onClick: (Product) -> Unit) {
     Card(
         modifier = Modifier
             .padding(horizontal = 8.dp)
-            .size(width = 126.dp, height = 144.dp),
+            .size(width = 126.dp, height = 144.dp)
+            .clickable { onClick(product) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.3f))
     ) {
