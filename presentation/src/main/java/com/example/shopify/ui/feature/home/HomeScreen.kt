@@ -1,5 +1,8 @@
 package com.example.shopify.ui.feature.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -192,7 +196,7 @@ fun HomeContent(
             Spacer(modifier = Modifier.size(16.dp))
         }
         item {
-            if (isLoading){
+            if (isLoading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -208,19 +212,30 @@ fun HomeContent(
             if (categories.isNotEmpty()) {
 
                 LazyRow {
-                    items(categories) { category ->
-                        Text(
-                            text = category.replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(8.dp)
+                    items(categories, key = { it }) { category ->
 
-                        )
+                        val isVisible = remember { mutableStateOf(false) }
+                        LaunchedEffect(key1 = true) {
+                            isVisible.value = true
+                        }
+                        AnimatedVisibility(
+                            visible = isVisible.value,
+                            enter = fadeIn() + expandVertically()
+                        ) {
+                            Text(
+                                text = category.replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .padding(8.dp)
+
+                            )
+                        }
+
                     }
                 }
                 Spacer(modifier = Modifier.size(16.dp))
@@ -266,8 +281,17 @@ fun HomeProductRow(products: List<Product>, title: String) {
         }
         Spacer(modifier = Modifier.size(8.dp))
         LazyRow {
-            items(products) { product ->
-                ProductItem(product = product)
+            items(products, key = { it.id }) { product ->
+                val isVisible = remember { mutableStateOf(false) }
+                LaunchedEffect(key1 = true) {
+                    isVisible.value = true
+                }
+                AnimatedVisibility(
+                    visible = isVisible.value,
+                    enter = fadeIn() + expandVertically()
+                ) {
+                    ProductItem(product = product)
+                }
             }
         }
 

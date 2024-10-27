@@ -1,7 +1,9 @@
 package com.example.data.network
 
-import com.example.data.model.DataProductModel
-import com.example.domain.model.Product
+import com.example.data.model.response.CategoriesListResponse
+import com.example.data.model.response.ProductListResponse
+import com.example.domain.model.CategoriesListModel
+import com.example.domain.model.ProductListModel
 import com.example.domain.network.NetworkService
 import com.example.domain.network.ResultWrapper
 import io.ktor.client.HttpClient
@@ -10,7 +12,6 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.header
 import io.ktor.client.request.request
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
@@ -22,22 +23,27 @@ class NetworkServiceImpl(
     val client: HttpClient,
 ) : NetworkService {
 
-    private val baseUrl = "https://fakestoreapi.com"
-    override suspend fun getProducts(category: String?): ResultWrapper<List<Product>> {
-        val url = if (category != null) "$baseUrl/products/category/$category" else "$baseUrl/products"
+    private val baseUrl = "https://ecommerce-ktor-4641e7ff1b63.herokuapp.com"
+    override suspend fun getProducts(category: Int?): ResultWrapper<ProductListModel> {
+        val url =
+            if (category != null) "$baseUrl/products/category/$category" else "$baseUrl/products"
         return makeWebRequest(
             url = url,
             method = HttpMethod.Get,
-            mapper = { dataModels:List<DataProductModel> ->
-                dataModels.map { it.toProduct() } }
+            mapper = { dataModels: ProductListResponse ->
+                dataModels.toProductList()
+            }
         )
     }
 
-    override suspend fun getCategories(): ResultWrapper<List<String>> {
-        val url = "$baseUrl/products/categories"
-        return makeWebRequest<List<String>, List<String>>(
-             url  = url,
+    override suspend fun getCategories(): ResultWrapper<CategoriesListModel> {
+        val url = "$baseUrl/categories"
+        return makeWebRequest(
+            url = url,
             method = HttpMethod.Get,
+            mapper = { categories: CategoriesListResponse ->
+                categories.toCategoriesList()
+            }
         )
     }
 
@@ -48,7 +54,7 @@ class NetworkServiceImpl(
         body: Any? = null,
         headers: Map<String, String> = emptyMap(),
         parameters: Map<String, String> = emptyMap(),
-        noinline mapper: ((T) -> R)? = null
+        noinline mapper: ((T) -> R)? = null,
     ): ResultWrapper<R> {
         return try {
             val response = client.request(url) {
