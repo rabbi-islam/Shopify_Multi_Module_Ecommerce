@@ -33,11 +33,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.shopify.model.UiProductModel
 import com.example.shopify.navigation.CartScreen
+import com.example.shopify.navigation.CartSummaryScreen
 import com.example.shopify.navigation.HomeScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
 import com.example.shopify.navigation.productNavType
 import com.example.shopify.ui.feature.cart.CartScreen
+import com.example.shopify.ui.feature.cartSummary.CartSummaryScreen
 import com.example.shopify.ui.feature.home.HomeScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.theme.ShopifyTheme
@@ -91,6 +93,10 @@ class MainActivity : ComponentActivity() {
                                     navController = navController,
                                     product = product.product
                                 )
+                            }
+                            composable<CartSummaryScreen> {
+                                shouldShowBottomNav.value = false
+                                CartSummaryScreen(navController = navController)
                             }
 
                         }
