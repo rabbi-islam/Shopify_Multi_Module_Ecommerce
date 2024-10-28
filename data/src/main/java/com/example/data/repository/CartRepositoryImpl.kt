@@ -12,4 +12,8 @@ class CartRepositoryImpl(
     override suspend fun addProductToCart(request: AddCartRequestModel): ResultWrapper<CartModel> {
         return networkService.addProductToCart(request)
     }
+
+    override suspend fun getCart(): ResultWrapper<CartModel> {
+        return networkService.getCart()
+    }
 }

@@ -37,6 +37,7 @@ import com.example.shopify.navigation.HomeScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
 import com.example.shopify.navigation.productNavType
+import com.example.shopify.ui.feature.cart.CartScreen
 import com.example.shopify.ui.feature.home.HomeScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.theme.ShopifyTheme
@@ -75,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable<CartScreen> {
                                 shouldShowBottomNav.value = true
-                                Text(text = "Cart")
+                                CartScreen(navController = navController)
                             }
                             composable<ProfileScreen> {
                                 shouldShowBottomNav.value = true

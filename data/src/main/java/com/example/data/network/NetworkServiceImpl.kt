@@ -65,6 +65,17 @@ class NetworkServiceImpl(
         )
     }
 
+    override suspend fun getCart(): ResultWrapper<CartModel> {
+        val url = "$baseUrl/cart/1"
+        return makeWebRequest(
+            url = url,
+            method = HttpMethod.Get,
+            mapper = { cartItem: CartResponse ->
+                cartItem.toCartModel()
+            }
+        )
+    }
+
 
     suspend inline fun <reified T, R> makeWebRequest(
         url: String,
