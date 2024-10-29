@@ -1,5 +1,6 @@
 package com.example.shopify.ui.feature.cartSummary
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import com.example.domain.model.CartSummary
 import com.example.shopify.R
 import com.example.shopify.model.UserAddress
 import com.example.shopify.model.UserAddressRouteWrapper
+import com.example.shopify.navigation.HomeScreen
 import com.example.shopify.navigation.UserAddressRoute
 import com.example.shopify.ui.feature.user_address.USER_ADDRESS_SCREEN
 import com.example.shopify.util.CurrencyUtils
@@ -48,7 +50,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CartSummaryScreen(
-    navController: NavController, viewModel: CartSummaryViewModel = koinViewModel()
+    navController: NavController, viewModel: CartSummaryViewModel = koinViewModel(),
 ) {
     val address = remember { mutableStateOf<UserAddress?>(null) }
 
@@ -73,8 +75,8 @@ fun CartSummaryScreen(
         }
         val uiState = viewModel.uiState.collectAsState()
         LaunchedEffect(navController) {
-          val saveState = navController.currentBackStackEntry?.savedStateHandle
-            saveState?.getStateFlow(USER_ADDRESS_SCREEN, address.value)?.collect{userAddress->
+            val saveState = navController.currentBackStackEntry?.savedStateHandle
+            saveState?.getStateFlow(USER_ADDRESS_SCREEN, address.value)?.collect { userAddress ->
                 address.value = userAddress
             }
         }
@@ -110,19 +112,64 @@ fun CartSummaryScreen(
                     Column {
                         AddressBar(
                             address = address.value?.toString() ?: "Please Select An Address.",
-                            onClick = {navController.navigate(
-                                UserAddressRoute(UserAddressRouteWrapper(address.value))
-                            )}
+                            onClick = {
+                                navController.navigate(
+                                    UserAddressRoute(UserAddressRouteWrapper(address.value))
+                                )
+                            }
                         )
                         Spacer(modifier = Modifier.size(8.dp))
                         CartSummaryScreenContent(event.summary)
                     }
                 }
+
+                is CartSummaryEvent.PlaceOrder -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_success),
+                            contentDescription = null
+                        )
+                        Text(
+                            text = "Order Placed Successfully :${event.orderId}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Button(onClick = {
+                            navController.popBackStack(
+                                HomeScreen,
+                                inclusive = false
+
+                            )
+                        }) {
+                            Text(
+                                text = "Continue Shopping",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    }
+
+
+                }
+
             }
         }
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Checkout", style = MaterialTheme.typography.titleMedium)
+        if (uiState.value !is CartSummaryEvent.PlaceOrder){
+            Button(
+                onClick = {
+                    Log.d("Address", address.value!!.toString())
+                    viewModel.placeOrder(address.value!!)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = address.value != null
+
+            ) {
+                Text(text = "Checkout", style = MaterialTheme.typography.titleMedium)
+            }
         }
+
     }
 }
 
@@ -194,7 +241,11 @@ fun AmountRow(title: String, amount: Double) {
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodySmall
         )
-        Text(text = CurrencyUtils.formatPrice(amount), style = MaterialTheme.typography.titleSmall,fontSize = 14.sp)
+        Text(
+            text = CurrencyUtils.formatPrice(amount),
+            style = MaterialTheme.typography.titleSmall,
+            fontSize = 14.sp
+        )
     }
 }
 
