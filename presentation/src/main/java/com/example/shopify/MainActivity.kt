@@ -32,16 +32,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.shopify.model.UiProductModel
+import com.example.shopify.model.UserAddressRouteWrapper
 import com.example.shopify.navigation.CartScreen
 import com.example.shopify.navigation.CartSummaryScreen
 import com.example.shopify.navigation.HomeScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
+import com.example.shopify.navigation.UserAddressRoute
 import com.example.shopify.navigation.productNavType
+import com.example.shopify.navigation.userAddressNavType
 import com.example.shopify.ui.feature.cart.CartScreen
 import com.example.shopify.ui.feature.cartSummary.CartSummaryScreen
 import com.example.shopify.ui.feature.home.HomeScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
+import com.example.shopify.ui.feature.user_address.UserAddressScreen
 import com.example.shopify.ui.theme.ShopifyTheme
 import kotlin.reflect.typeOf
 
@@ -97,6 +101,14 @@ class MainActivity : ComponentActivity() {
                             composable<CartSummaryScreen> {
                                 shouldShowBottomNav.value = false
                                 CartSummaryScreen(navController = navController)
+                            }
+
+                            composable<UserAddressRoute>(
+                                typeMap = mapOf(typeOf<UserAddressRouteWrapper>() to userAddressNavType)
+                            ) {
+                                shouldShowBottomNav.value = false
+                                val address = it.toRoute<UserAddressRoute>()
+                                UserAddressScreen(navController = navController, userAddress =address.userAddressWrapper.userAddress )
                             }
 
                         }
