@@ -36,6 +36,7 @@ import com.example.shopify.model.UserAddressRouteWrapper
 import com.example.shopify.navigation.CartScreen
 import com.example.shopify.navigation.CartSummaryScreen
 import com.example.shopify.navigation.HomeScreen
+import com.example.shopify.navigation.OrderScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
 import com.example.shopify.navigation.UserAddressRoute
@@ -44,6 +45,7 @@ import com.example.shopify.navigation.userAddressNavType
 import com.example.shopify.ui.feature.cart.CartScreen
 import com.example.shopify.ui.feature.cartSummary.CartSummaryScreen
 import com.example.shopify.ui.feature.home.HomeScreen
+import com.example.shopify.ui.feature.orders.OrdersScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.feature.user_address.UserAddressScreen
 import com.example.shopify.ui.theme.ShopifyTheme
@@ -83,6 +85,11 @@ class MainActivity : ComponentActivity() {
                             composable<CartScreen> {
                                 shouldShowBottomNav.value = true
                                 CartScreen(navController = navController)
+                            }
+                            composable<OrderScreen> {
+                                shouldShowBottomNav.value = true
+                                OrdersScreen()
+
                             }
                             composable<ProfileScreen> {
                                 shouldShowBottomNav.value = true
@@ -126,7 +133,7 @@ class MainActivity : ComponentActivity() {
                 navController.currentBackStackEntryAsState().value?.destination?.route
             val items = listOf(
                 BottomNavItems.Home,
-                BottomNavItems.Cart,
+                BottomNavItems.Order,
                 BottomNavItems.Profile
             )
 
@@ -167,7 +174,7 @@ class MainActivity : ComponentActivity() {
 
 sealed class BottomNavItems(val route: Any, val title: String, val icon: Int) {
     data object Home : BottomNavItems(HomeScreen, "Home", icon = R.drawable.ic_home)
-    data object Cart : BottomNavItems(CartScreen, "Cart", icon = R.drawable.ic_cart)
+    data object Order : BottomNavItems(OrderScreen, "Order", icon = R.drawable.ic_cart)
     data object Profile : BottomNavItems(ProfileScreen, "Profile", icon = R.drawable.ic_profile_bn)
 }
 
