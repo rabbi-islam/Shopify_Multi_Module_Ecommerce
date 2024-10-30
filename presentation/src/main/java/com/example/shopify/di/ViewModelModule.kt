@@ -1,5 +1,7 @@
 package com.example.shopify.di
 
+import com.example.shopify.ui.feature.authentication.login.LoginViewModel
+import com.example.shopify.ui.feature.authentication.register.RegisterViewModel
 import com.example.shopify.ui.feature.cart.CartViewModel
 import com.example.shopify.ui.feature.cartSummary.CartSummaryViewModel
 import com.example.shopify.ui.feature.home.HomeViewModel
@@ -14,4 +16,6 @@ val viewModelModule = module {
     viewModel { CartViewModel(get(), get(), get()) }
     viewModel { CartSummaryViewModel(get(), get()) }
     viewModel { OrdersViewModel(get())}
+    viewModel { RegisterViewModel(get())}
+    viewModel { LoginViewModel(get())}
 }

@@ -36,12 +36,14 @@ import com.example.shopify.model.UserAddressRouteWrapper
 import com.example.shopify.navigation.CartScreen
 import com.example.shopify.navigation.CartSummaryScreen
 import com.example.shopify.navigation.HomeScreen
+import com.example.shopify.navigation.LoginScreen
 import com.example.shopify.navigation.OrderScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
 import com.example.shopify.navigation.UserAddressRoute
 import com.example.shopify.navigation.productNavType
 import com.example.shopify.navigation.userAddressNavType
+import com.example.shopify.ui.feature.authentication.login.LoginScreen
 import com.example.shopify.ui.feature.cart.CartScreen
 import com.example.shopify.ui.feature.cartSummary.CartSummaryScreen
 import com.example.shopify.ui.feature.home.HomeScreen
@@ -49,6 +51,7 @@ import com.example.shopify.ui.feature.orders.OrdersScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.feature.user_address.UserAddressScreen
 import com.example.shopify.ui.theme.ShopifyTheme
+import kotlinx.coroutines.delay
 import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
@@ -76,7 +79,13 @@ class MainActivity : ComponentActivity() {
                             .padding(it)
                     ) {
 
-                        NavHost(navController = navController, startDestination = HomeScreen) {
+
+                        NavHost(navController = navController, startDestination = if (ShopperSession.getUser() != null) HomeScreen else LoginScreen) {
+
+                            composable<LoginScreen> {
+                                shouldShowBottomNav.value = false
+                                LoginScreen(navController)
+                            }
 
                             composable<HomeScreen> {
                                 shouldShowBottomNav.value = true

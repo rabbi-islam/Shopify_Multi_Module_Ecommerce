@@ -5,6 +5,12 @@ import com.example.shopify.model.UserAddressRouteWrapper
 import kotlinx.serialization.Serializable
 
 @Serializable
+object LoginScreen
+
+@Serializable
+object RegisterScreen
+
+@Serializable
 object HomeScreen
 
 @Serializable

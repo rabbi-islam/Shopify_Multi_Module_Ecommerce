@@ -3,12 +3,15 @@ package com.example.data.network
 import android.util.Log
 import com.example.data.model.request.AddToCartRequest
 import com.example.data.model.request.AddressDataModel
+import com.example.data.model.request.LoginRequest
+import com.example.data.model.request.RegisterRequest
 import com.example.data.model.response.CartResponse
 import com.example.data.model.response.CartSummaryResponse
 import com.example.data.model.response.CategoriesListResponse
 import com.example.data.model.response.OrdersListResponse
 import com.example.data.model.response.PlaceOrderResponse
 import com.example.data.model.response.ProductListResponse
+import com.example.data.model.response.UserAuthResponse
 import com.example.domain.model.AddressDomainModel
 import com.example.domain.model.CartItemModel
 import com.example.domain.model.CartModel
@@ -16,6 +19,7 @@ import com.example.domain.model.CartSummary
 import com.example.domain.model.CategoriesListModel
 import com.example.domain.model.OrdersListModel
 import com.example.domain.model.ProductListModel
+import com.example.domain.model.UserDomainModel
 import com.example.domain.model.request.AddCartRequestModel
 import com.example.domain.network.NetworkService
 import com.example.domain.network.ResultWrapper
@@ -133,7 +137,11 @@ class NetworkServiceImpl(
             }).also { result ->
             when (result) {
                 is ResultWrapper.Success -> Log.d("PlaceOrder", "Success: ${result.value}")
-                is ResultWrapper.Failure -> Log.e("PlaceOrder", "Error: ${result.exception.message}", result.exception)
+                is ResultWrapper.Failure -> Log.e(
+                    "PlaceOrder",
+                    "Error: ${result.exception.message}",
+                    result.exception
+                )
             }
         }
     }
@@ -145,6 +153,34 @@ class NetworkServiceImpl(
             mapper = { ordersResponse: OrdersListResponse ->
                 ordersResponse.toDomainResponse()
             })
+    }
+
+    override suspend fun register(
+        name: String,
+        email: String,
+        password: String,
+    ): ResultWrapper<UserDomainModel> {
+        val url = "$baseUrl/signup"
+        return makeWebRequest(
+            url = url,
+            method = HttpMethod.Post,
+            body = RegisterRequest(email, password, name),
+            mapper = { userResponse: UserAuthResponse ->
+                userResponse.data.toDomainModel()
+            }
+        )
+    }
+
+    override suspend fun login(email: String, password: String): ResultWrapper<UserDomainModel> {
+        val url = "$baseUrl/login"
+        return makeWebRequest(
+            url = url,
+            method = HttpMethod.Post,
+            body = LoginRequest(email, password),
+            mapper = { userResponse: UserAuthResponse ->
+                userResponse.data.toDomainModel()
+            }
+        )
     }
 
 
