@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.model.request.AddCartRequestModel
 import com.example.domain.network.ResultWrapper
 import com.example.domain.usecase.AddToCartUseCase
+import com.example.shopify.ShopperSession
 import com.example.shopify.model.UiProductModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +14,8 @@ import kotlinx.coroutines.launch
 class ProductDetailsViewModel(
     private val useCase: AddToCartUseCase,
 ) : ViewModel() {
+
+    val userDomainModel = ShopperSession.getUser()
 
     private val _state = MutableStateFlow<ProductDetailsEvent>(ProductDetailsEvent.Nothing)
     val state = _state.asStateFlow()
@@ -26,8 +29,9 @@ class ProductDetailsViewModel(
                     productName = product.title,
                     price = product.price,
                     quantity = 1,
-                    userId = 1
-                )
+                    userId = userDomainModel!!.id!!
+                ),
+                userDomainModel.id!!.toLong()
             )
             when(result){
                 is ResultWrapper.Success -> {

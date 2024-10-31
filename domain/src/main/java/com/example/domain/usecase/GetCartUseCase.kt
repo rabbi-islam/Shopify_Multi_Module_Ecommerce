@@ -6,6 +6,6 @@ class GetCartUseCase(
     private val repository: CartRepository
 
 ) {
-    suspend fun execute() = repository.getCart()
+    suspend fun execute(userId: Long) = repository.getCart(userId)
 
 }

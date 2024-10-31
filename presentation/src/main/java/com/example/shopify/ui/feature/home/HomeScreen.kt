@@ -50,6 +50,7 @@ import coil.compose.AsyncImage
 import com.example.domain.model.Product
 import com.example.shopify.R
 import com.example.shopify.model.UiProductModel
+import com.example.shopify.navigation.CartScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -102,6 +103,9 @@ fun HomeScreen(
                 error.value,
                 onClick = {
                     navController.navigate(ProductDetailsScreen(UiProductModel.fromProduct(it)))
+                },
+                onCartIconClicked = {
+                    navController.navigate(CartScreen)
                 }
             )
         }
@@ -110,7 +114,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun ProfileHeader() {
+fun ProfileHeader(onCartIconClicked: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,17 +143,36 @@ fun ProfileHeader() {
             }
 
         }
-        Image(
-            painter = painterResource(id = R.drawable.ic_notification),
-            contentDescription = null,
+        Row(
             modifier = Modifier
-                .size(48.dp)
                 .align(Alignment.CenterEnd)
-                .clip(CircleShape)
-                .background(Color.LightGray.copy(alpha = 0.3f))
-                .padding(8.dp),
-            contentScale = ContentScale.Inside
-        )
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_notification),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray.copy(alpha = 0.3f))
+                    .padding(8.dp),
+                contentScale = ContentScale.Inside
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_carts),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray.copy(alpha = 0.3f))
+                    .clickable {
+                        onCartIconClicked()
+                    }
+                    .padding(8.dp),
+                contentScale = ContentScale.Inside
+            )
+        }
+
     }
 }
 
@@ -193,11 +216,12 @@ fun HomeContent(
     categories: List<String>,
     isLoading: Boolean = false,
     errorMsg: String? = null,
-    onClick: (Product) -> Unit
+    onClick: (Product) -> Unit,
+    onCartIconClicked: () -> Unit
 ) {
     LazyColumn {
         item {
-            ProfileHeader()
+            ProfileHeader(onCartIconClicked)
             Spacer(modifier = Modifier.size(16.dp))
             SearchBar(value = "", onTextChanged = {})
             Spacer(modifier = Modifier.size(16.dp))
@@ -297,7 +321,7 @@ fun HomeProductRow(products: List<Product>, title: String, onClick: (Product) ->
                     visible = isVisible.value,
                     enter = fadeIn() + expandVertically()
                 ) {
-                    ProductItem(product = product, onClick = {onClick(product)})
+                    ProductItem(product = product, onClick = { onClick(product) })
                 }
             }
         }

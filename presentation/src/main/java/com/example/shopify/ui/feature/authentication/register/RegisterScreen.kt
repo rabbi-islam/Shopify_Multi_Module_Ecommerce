@@ -1,4 +1,4 @@
-package com.example.shopify.ui.feature.authentication.login
+package com.example.shopify.ui.feature.authentication.register
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,23 +22,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.shopify.navigation.HomeScreen
-import com.example.shopify.navigation.RegisterScreen
 import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: LoginViewModel = koinViewModel()) {
+fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = koinViewModel()) {
 
-    val loginState = viewModel.loginState.collectAsState()
+    val registerState = viewModel.registerState.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when (val state = loginState.value) {
-            is LoginState.Success -> {
-                LaunchedEffect(loginState.value) {
+        when (val state = registerState.value) {
+            is RegisterState.Success -> {
+                LaunchedEffect(registerState.value) {
                     navController.navigate(HomeScreen) {
                         popUpTo(HomeScreen) {
                             inclusive = true
@@ -47,22 +46,22 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = koinVi
                 }
             }
 
-            is LoginState.Error -> {
+            is RegisterState.Error -> {
                 Text(text = state.message)
                 // Show error message
             }
 
-            is LoginState.Loading -> {
+            is RegisterState.Loading -> {
                 CircularProgressIndicator()
                 Text(text = "Loading...")
             }
 
             else -> {
-                LoginContent(onSignInClicked = { email, password ->
-                    viewModel.login(email, password)
+                RegisterContent(onSignUpClicked = { name, email, password ->
+                    viewModel.register(name = name, email = email, password = password)
                 },
-                    onRegisterClick = {
-                        navController.navigate(RegisterScreen)
+                    onLoginClick = {
+                        navController.popBackStack()
                     })
             }
         }
@@ -70,7 +69,12 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = koinVi
 }
 
 @Composable
-fun LoginContent(onSignInClicked: (String, String) -> Unit, onRegisterClick: () -> Unit) {
+fun RegisterContent(onSignUpClicked: (String, String, String) -> Unit, onLoginClick: () -> Unit) {
+
+    val name = remember {
+        mutableStateOf("")
+    }
+
     val email = remember {
         mutableStateOf("")
     }
@@ -84,7 +88,17 @@ fun LoginContent(onSignInClicked: (String, String) -> Unit, onRegisterClick: () 
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.titleLarge)
+        Text(text = "Register", style = MaterialTheme.typography.titleLarge)
+        OutlinedTextField(
+            value = name.value,
+            onValueChange = {
+                name.value = it
+            },
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth(),
+            label = { Text(text = "Name") }
+        )
         OutlinedTextField(
             value = email.value,
             onValueChange = {
@@ -108,16 +122,16 @@ fun LoginContent(onSignInClicked: (String, String) -> Unit, onRegisterClick: () 
         )
         Button(
             onClick = {
-                onSignInClicked(email.value, password.value)
+                onSignUpClicked(email.value, password.value, name.value)
             }, modifier = Modifier.fillMaxWidth(),
-            enabled = email.value.isNotEmpty() && password.value.isNotEmpty()
+            enabled = email.value.isNotEmpty() && password.value.isNotEmpty() && name.value.isNotEmpty()
         ) {
-            Text(text = "Login")
+            Text(text = "Register")
         }
-        Text(text = "Don't Have An Account? Register", modifier = Modifier
+        Text(text = "Already Have An Account? Login", modifier = Modifier
             .padding(8.dp)
             .clickable {
-                onRegisterClick()
+                onLoginClick()
             })
     }
 }

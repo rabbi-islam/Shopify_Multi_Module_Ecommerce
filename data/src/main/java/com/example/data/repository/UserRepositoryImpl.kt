@@ -8,13 +8,8 @@ import com.example.domain.repository.UserRepository
 class UserRepositoryImpl(
     private val networkService: NetworkService
 ):UserRepository {
-    override suspend fun register(
-        name: String,
-        email: String,
-        password: String,
-    ): ResultWrapper<UserDomainModel> {
-        return networkService.register(name, email, password)
-    }
+    override suspend fun register(email: String, password: String, name: String) =
+        networkService.register(email, password, name)
 
     override suspend fun login(email: String, password: String): ResultWrapper<UserDomainModel> {
         return networkService.login(email, password)

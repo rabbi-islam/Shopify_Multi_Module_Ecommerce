@@ -40,10 +40,12 @@ import com.example.shopify.navigation.LoginScreen
 import com.example.shopify.navigation.OrderScreen
 import com.example.shopify.navigation.ProductDetailsScreen
 import com.example.shopify.navigation.ProfileScreen
+import com.example.shopify.navigation.RegisterScreen
 import com.example.shopify.navigation.UserAddressRoute
 import com.example.shopify.navigation.productNavType
 import com.example.shopify.navigation.userAddressNavType
 import com.example.shopify.ui.feature.authentication.login.LoginScreen
+import com.example.shopify.ui.feature.authentication.register.RegisterScreen
 import com.example.shopify.ui.feature.cart.CartScreen
 import com.example.shopify.ui.feature.cartSummary.CartSummaryScreen
 import com.example.shopify.ui.feature.home.HomeScreen
@@ -51,7 +53,6 @@ import com.example.shopify.ui.feature.orders.OrdersScreen
 import com.example.shopify.ui.feature.product_details.ProductDetailsScreen
 import com.example.shopify.ui.feature.user_address.UserAddressScreen
 import com.example.shopify.ui.theme.ShopifyTheme
-import kotlinx.coroutines.delay
 import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
@@ -85,6 +86,11 @@ class MainActivity : ComponentActivity() {
                             composable<LoginScreen> {
                                 shouldShowBottomNav.value = false
                                 LoginScreen(navController)
+                            }
+
+                            composable<RegisterScreen> {
+                                shouldShowBottomNav.value = false
+                                RegisterScreen(navController)
                             }
 
                             composable<HomeScreen> {
@@ -183,7 +189,7 @@ class MainActivity : ComponentActivity() {
 
 sealed class BottomNavItems(val route: Any, val title: String, val icon: Int) {
     data object Home : BottomNavItems(HomeScreen, "Home", icon = R.drawable.ic_home)
-    data object Order : BottomNavItems(OrderScreen, "Order", icon = R.drawable.ic_cart)
+    data object Order : BottomNavItems(OrderScreen, "Order", icon = R.drawable.ic_orders)
     data object Profile : BottomNavItems(ProfileScreen, "Profile", icon = R.drawable.ic_profile_bn)
 }
 

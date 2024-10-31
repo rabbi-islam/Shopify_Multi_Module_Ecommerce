@@ -6,6 +6,7 @@ import com.example.domain.model.CartSummary
 import com.example.domain.network.ResultWrapper
 import com.example.domain.usecase.CartSummaryUseCase
 import com.example.domain.usecase.PlaceOrderUseCase
+import com.example.shopify.ShopperSession
 import com.example.shopify.model.UserAddress
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,15 +16,16 @@ class CartSummaryViewModel(
     private val cartSummaryUseCase: CartSummaryUseCase,
     private val placeOrderUseCase: PlaceOrderUseCase
 ) : ViewModel() {
+    val userDomainModel = ShopperSession.getUser()
 
     private val _uiState = MutableStateFlow<CartSummaryEvent>(CartSummaryEvent.Loading)
     val uiState = _uiState.asStateFlow()
 
     init {
-        getCartSummary(1)
+        getCartSummary(userDomainModel!!.id!!.toLong())
     }
 
-    private fun getCartSummary(userId: Int) {
+    private fun getCartSummary(userId: Long) {
         viewModelScope.launch {
             _uiState.value = CartSummaryEvent.Loading
             val summary = cartSummaryUseCase.execute(userId)
@@ -42,7 +44,7 @@ class CartSummaryViewModel(
     public fun placeOrder(userAddress: UserAddress) {
         viewModelScope.launch {
             _uiState.value = CartSummaryEvent.Loading
-            val orderId = placeOrderUseCase.execute(userAddress.toAddressDataModel())
+            val orderId = placeOrderUseCase.execute(userAddress.toAddressDataModel(), userDomainModel!!.id!!.toLong())
             when (orderId) {
                 is ResultWrapper.Success -> {
                     _uiState.value = CartSummaryEvent.PlaceOrder(orderId.value)

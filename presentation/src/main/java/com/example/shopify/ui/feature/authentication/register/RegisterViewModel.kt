@@ -4,37 +4,39 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.network.ResultWrapper
 import com.example.domain.usecase.RegisterUseCase
+import com.example.shopify.ShopperSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(
-    private val registerUseCase: RegisterUseCase,
+    private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
-
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
-    val loginState = _registerState
+    val registerState = _registerState
 
-    fun login(name:String, email: String, password: String) {
+    fun register(email: String, password: String, name: String) {
         _registerState.value = RegisterState.Loading
         viewModelScope.launch {
-            when (val result = registerUseCase.execute(name, email, password)) {
+            when (val response = registerUseCase.execute(email = email, password = password, name = name)) {
                 is ResultWrapper.Success -> {
-                    _registerState.value = RegisterState.Success
+                    ShopperSession.storeUser(response.value)
+                    _registerState.value = RegisterState.Success()
                 }
 
                 is ResultWrapper.Failure -> {
-                    _registerState.value =
-                        RegisterState.Error(result.exception.message ?: "Something went wrong!")
+                    _registerState.value = RegisterState.Error(
+                        response.exception.message
+                            ?: "Something went wrong!"
+                    )
                 }
             }
         }
     }
 }
 
-    sealed class RegisterState {
-        data object Idle : RegisterState()
-        data object Loading : RegisterState()
-        data object Success : RegisterState()
-        data class Error(val message: String) : RegisterState()
-
-    }
+sealed class RegisterState {
+    object Idle : RegisterState()
+    object Loading : RegisterState()
+    class Success : RegisterState()
+    data class Error(val message: String) : RegisterState()
+}

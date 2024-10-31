@@ -6,6 +6,7 @@ import com.example.domain.model.CartItemModel
 import com.example.domain.usecase.DeleteProductUseCase
 import com.example.domain.usecase.GetCartUseCase
 import com.example.domain.usecase.UpdateQuantityUseCase
+import com.example.shopify.ShopperSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -15,6 +16,8 @@ class CartViewModel(
     private val updateQuantityUseCase: UpdateQuantityUseCase,
     private val deleteItem: DeleteProductUseCase,
 ) : ViewModel() {
+
+    val userDomainModel = ShopperSession.getUser()
 
     private val _uiState = MutableStateFlow<CartEvent>(CartEvent.Loading)
     val uiState = _uiState.asStateFlow()
@@ -27,7 +30,7 @@ class CartViewModel(
 
         viewModelScope.launch {
             _uiState.value = CartEvent.Loading
-            useCase.execute().let { result ->
+            useCase.execute(userDomainModel!!.id!!.toLong()).let { result ->
                 when (result) {
                     is com.example.domain.network.ResultWrapper.Success -> {
                         _uiState.value = CartEvent.Success(result.value.data)
@@ -56,7 +59,7 @@ class CartViewModel(
     private fun updateQuantity(item: CartItemModel) {
         viewModelScope.launch {
             _uiState.value = CartEvent.Loading
-            updateQuantityUseCase.execute(item).let { result ->
+            updateQuantityUseCase.execute(item, userDomainModel!!.id!!.toLong()).let { result ->
                 when (result) {
                     is com.example.domain.network.ResultWrapper.Success -> {
                         _uiState.value = CartEvent.Success(result.value.data)

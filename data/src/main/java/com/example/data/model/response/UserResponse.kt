@@ -8,7 +8,7 @@ data class UserResponse(
     val id: Int?,
     val username: String,
     val email: String,
-    val name: String,
+    val name: String
 ) {
     fun toDomainModel() = UserDomainModel(
         id = id,

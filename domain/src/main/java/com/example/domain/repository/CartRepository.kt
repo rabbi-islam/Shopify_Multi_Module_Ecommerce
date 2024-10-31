@@ -7,11 +7,9 @@ import com.example.domain.model.request.AddCartRequestModel
 import com.example.domain.network.ResultWrapper
 
 interface CartRepository {
-    suspend fun addProductToCart(request: AddCartRequestModel): ResultWrapper<CartModel>
-    suspend fun getCart(): ResultWrapper<CartModel>
-    suspend fun updateQuantity(cartItemModel: CartItemModel): ResultWrapper<CartModel>
-    suspend fun deleteItem(cartItemId: Int, userId:Int): ResultWrapper<CartModel>
-    suspend fun getCartSummary(userId: Int): ResultWrapper<CartSummary>
-
-
+    suspend fun addProductToCart(request: AddCartRequestModel, userId: Long): ResultWrapper<CartModel>
+    suspend fun getCart(userId: Long): ResultWrapper<CartModel>
+    suspend fun updateQuantity(cartItemModel: CartItemModel, userId: Long): ResultWrapper<CartModel>
+    suspend fun deleteItem(cartItemId: Int, userId:Long): ResultWrapper<CartModel>
+    suspend fun getCartSummary(userId: Long): ResultWrapper<CartSummary>
 }
