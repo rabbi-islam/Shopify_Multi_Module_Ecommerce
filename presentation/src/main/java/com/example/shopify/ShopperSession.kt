@@ -31,4 +31,19 @@ object ShopperSession : KoinComponent {
             null
         }
     }
+
+    fun saveLanguage(languageCode: String) {
+        val sharedPref = context.getSharedPreferences("language_pref", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("language", languageCode)
+            apply()
+        }
+    }
+
+    fun getSavedLanguage(): String? {
+        val sharedPref = context.getSharedPreferences("language_pref", Context.MODE_PRIVATE)
+        return sharedPref.getString("language", null)
+
+    }
+
 }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,6 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -34,14 +37,18 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,24 +56,29 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.domain.model.Product
 import com.example.shopify.R
+import com.example.shopify.model.LanguageModel
 import com.example.shopify.model.UiProductModel
 import com.example.shopify.navigation.CartScreen
 import com.example.shopify.navigation.ProductDetailsScreen
+import com.example.shopify.ui.components.LanguageListItem
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = koinViewModel(),
+    viewModel: HomeViewModel = koinViewModel()
 ) {
 
     val uiState = viewModel.uiState.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
+
     val loading = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
 
     val featured = remember { mutableStateOf<List<Product>>(emptyList()) }
     val popularProducts = remember { mutableStateOf<List<Product>>(emptyList()) }
     val categories = remember { mutableStateOf<List<String>>(emptyList()) }
+    val context = LocalContext.current
 
     Scaffold {
         Surface(
@@ -106,6 +118,10 @@ fun HomeScreen(
                 },
                 onCartIconClicked = {
                     navController.navigate(CartScreen)
+                },
+                currentLanguage = currentLanguage,
+                onCurrentLanguageChange = {newLanguageCode ->
+                    viewModel.setLanguage(context,newLanguageCode)
                 }
             )
         }
@@ -114,7 +130,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun ProfileHeader(onCartIconClicked: () -> Unit) {
+fun ProfileHeader(
+    onCartIconClicked: () -> Unit,
+    currentLanguage: String,
+    onCurrentLanguageChange: (String) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -136,7 +156,7 @@ fun ProfileHeader(onCartIconClicked: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Text(
-                    text = "Jon Doe",
+                    text = stringResource(R.string.jon_doe),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -145,7 +165,9 @@ fun ProfileHeader(onCartIconClicked: () -> Unit) {
         }
         Row(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
+                .align(Alignment.CenterEnd),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_notification),
@@ -153,8 +175,7 @@ fun ProfileHeader(onCartIconClicked: () -> Unit) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray.copy(alpha = 0.3f))
-                    .padding(8.dp),
+                    .background(Color.LightGray.copy(alpha = 0.3f)),
                 contentScale = ContentScale.Inside
             )
 
@@ -170,6 +191,18 @@ fun ProfileHeader(onCartIconClicked: () -> Unit) {
                     }
                     .padding(8.dp),
                 contentScale = ContentScale.Inside
+            )
+            val allLanguages = listOf(
+                LanguageModel("en", "English", R.drawable.uk),
+                LanguageModel("bn", "Bangla", R.drawable.bd)
+            )
+            LanguagesDropdown(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background),
+                languagesList = allLanguages,
+                currentLanguage = currentLanguage,
+                onCurrentLanguageChange = onCurrentLanguageChange
+
             )
         }
 
@@ -217,11 +250,13 @@ fun HomeContent(
     isLoading: Boolean = false,
     errorMsg: String? = null,
     onClick: (Product) -> Unit,
-    onCartIconClicked: () -> Unit
+    onCartIconClicked: () -> Unit,
+    currentLanguage: String,
+    onCurrentLanguageChange: (String) -> Unit
 ) {
     LazyColumn {
         item {
-            ProfileHeader(onCartIconClicked)
+            ProfileHeader(onCartIconClicked, currentLanguage, onCurrentLanguageChange)
             Spacer(modifier = Modifier.size(16.dp))
             SearchBar(value = "", onTextChanged = {})
             Spacer(modifier = Modifier.size(16.dp))
@@ -275,11 +310,11 @@ fun HomeContent(
         item {
 
             if (featured.isNotEmpty()) {
-                HomeProductRow(featured, "Featured", onClick = onClick)
+                HomeProductRow(featured, stringResource(R.string.featured), onClick = onClick)
                 Spacer(modifier = Modifier.size(16.dp))
             }
             if (popularProducts.isNotEmpty()) {
-                HomeProductRow(popularProducts, "Popular Products", onClick = onClick)
+                HomeProductRow(popularProducts, stringResource(R.string.popular_products), onClick = onClick)
             }
 
         }
@@ -304,7 +339,7 @@ fun HomeProductRow(products: List<Product>, title: String, onClick: (Product) ->
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "View All",
+                text = stringResource(R.string.view_all),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -367,6 +402,54 @@ fun ProductItem(product: Product, onClick: (Product) -> Unit) {
                 fontWeight = FontWeight.SemiBold
 
             )
+        }
+    }
+}
+
+
+@Composable
+fun LanguagesDropdown(
+    modifier: Modifier = Modifier,
+    languagesList: List<LanguageModel>,
+    currentLanguage: String,
+    onCurrentLanguageChange: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf(languagesList.first { it.code == currentLanguage }) }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .clickable {
+                    expanded = !expanded
+                }
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = Modifier.size(36.dp),
+                painter = painterResource(selectedItem.flag),
+                contentScale = ContentScale.Fit,
+                contentDescription = selectedItem.code
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+        ) {
+            languagesList.forEach { item ->
+                DropdownMenuItem(
+                    text = { LanguageListItem(selectedItem = item) },
+                    onClick = {
+                        selectedItem = item
+                        expanded = false
+                        onCurrentLanguageChange(item.code)
+                    }
+                )
+            }
         }
     }
 }

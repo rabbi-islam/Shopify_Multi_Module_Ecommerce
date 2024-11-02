@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Shopify</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="don_t_have_an_account_register">Don\'t Have An Account? Register</string>
+    <string name="jon_doe">Jon Doe</string>
+    <string name="home">Home</string>
+    <string name="order">Order</string>
+    <string name="profile">Profile</string>
+    <string name="popular_products">Popular Product</string>
+    <string name="featured">Featured Product</string>
+    <string name="view_all">View All</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -56,7 +58,6 @@ import com.example.shopify.ui.theme.ShopifyTheme
 import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -168,7 +169,7 @@ class MainActivity : ComponentActivity() {
                             restoreState = true
                         }
                     },
-                    label = { Text(text = item.title) },
+                    label = { Text(stringResource(item.titleRes)) },
                     icon = {
                         Image(
                             painter = painterResource(id = item.icon),
@@ -187,10 +188,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class BottomNavItems(val route: Any, val title: String, val icon: Int) {
-    data object Home : BottomNavItems(HomeScreen, "Home", icon = R.drawable.ic_home)
-    data object Order : BottomNavItems(OrderScreen, "Order", icon = R.drawable.ic_orders)
-    data object Profile : BottomNavItems(ProfileScreen, "Profile", icon = R.drawable.ic_profile_bn)
+sealed class BottomNavItems(val route: Any, @StringRes val titleRes: Int, val icon: Int) {
+    data object Home : BottomNavItems(HomeScreen, R.string.home, icon = R.drawable.ic_home)
+    data object Order : BottomNavItems(OrderScreen, R.string.order, icon = R.drawable.ic_orders)
+    data object Profile : BottomNavItems(ProfileScreen, R.string.profile, icon = R.drawable.ic_profile_bn)
 }
 
 

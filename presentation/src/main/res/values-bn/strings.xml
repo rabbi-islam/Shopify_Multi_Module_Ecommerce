@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">শপিফাই</string>
+    <string name="login">লগইন</string>
+    <string name="email">ইমেইল</string>
+    <string name="password">পাসওয়ার্ড</string>
+    <string name="don_t_have_an_account_register">অ্যাকাউন্ট নেই? রেজিস্টার করুন</string>
+    <string name="jon_doe">জন ডো</string>
+    <string name="home">হোম</string>
+    <string name="order">অর্ডার</string>
+    <string name="profile">প্রোফাইল</string>
+    <string name="popular_products">জনপ্রিয় পণ্য</string>
+    <string name="featured">ফিচার্ড পণ্য</string>
+    <string name="view_all">সবগুলো দেখুন</string>
+</resources>
